@@ -18,7 +18,7 @@ curl http://localhost:3000/api/test-connection
 ```bash
 # Verify your .env.local file has:
 NEXT_PUBLIC_SUPABASE_URL=https://otkvdkbqsmrxzxyojlis.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=<SUPABASE_SERVICE_ROLE_KEY>
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -113,8 +113,8 @@ Create/update your `.env.local` file:
 ```env
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://otkvdkbqsmrxzxyojlis.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90a3Zka2Jxc21yeHp4eW9qbGlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxMTMzMzksImV4cCI6MjA3MDY4OTMzOX0.GZBtorVOddPJi39r2s0HrritFHmKJsmwXxy7ysWUXFQ
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90a3Zka2Jxc21yeHp4eW9qbGlzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTExMzMzOSwiZXhwIjoyMDcwNjg5MzM5fQ.kvC8cXpAWIfeB2vAZ3KkvS4Y9rE8AWhBplGoWfdZXoI
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<SUPABASE_ANON_KEY>
+SUPABASE_SERVICE_ROLE_KEY=<SUPABASE_SERVICE_ROLE_KEY>
 
 # Replicate API Configuration
 REPLICATE_API_TOKEN=your_replicate_api_token_here
@@ -124,7 +124,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 GENERATION_CYCLE_MINUTES=7
 
 # Security Configuration
-CRON_SECRET=entity_cron_secret_2024_secure_key
+CRON_SECRET=<CRON_SECRET>
 ```
 
 ---
@@ -165,7 +165,7 @@ node -e "
 const { createClient } = require('@supabase/supabase-js');
 const client = createClient(
   'https://otkvdkbqsmrxzxyojlis.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90a3Zka2Jxc21yeHp4eW9qbGlzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTExMzMzOSwiZXhwIjoyMDcwNjg5MzM5fQ.kvC8cXpAWIfeB2vAZ3KkvS4Y9rE8AWhBplGoWfdZXoI'
+  '<SUPABASE_SERVICE_ROLE_KEY>'
 );
 client.from('species').select('count').then(console.log);
 "
