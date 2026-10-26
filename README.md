@@ -12,4 +12,4 @@ Live: [entity-three.vercel.app](https://entity-three.vercel.app) (builds and loa
 
 - [CLAUDE.md](CLAUDE.md): hard rules, stack, file map and workflow
 - [docs/ASSESSMENT.md](docs/ASSESSMENT.md): findings ledger (F-01 onward)
-- [docs/archive/](docs/archive/): notes and scripts from the 2025 build, kept for reference
+- [docs/archive/](docs/archive/): notes and data from the 2025 build, kept for reference

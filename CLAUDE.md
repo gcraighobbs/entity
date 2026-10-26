@@ -24,14 +24,26 @@ Read this first in every session. This repo is the source of truth for Entity's 
 | Layer | Now | Target (Phase A) |
 | --- | --- | --- |
 | Frontend | Next.js 15.5.28 (app router), React 19.1.10, TypeScript 5, Tailwind 4, Framer Motion 12 | Same |
-| Backend | Next.js route handlers (46, no inbound auth) | Read-only routes; admin routes guarded or removed (A3) |
+| Backend | One route handler, `GET /api/species` (static); `src/middleware.ts` refuses writes (A3) | Same |
 | Hosting | Vercel Hobby, project `entity`, team `gcraighobbs-projects`, production `entity-three.vercel.app` | Same, then the custom domain (A4) |
-| Catalog | `src/data/species.json` (A2, 130 species); the app still reads Supabase, paused | App reads `species.json` (A3) |
-| Media | Supabase Storage, paused | Cloudflare R2, custom media domain (A3) |
-| Generation | Replicate and fal code already stubbed (throws or returns 503) | Removed (A3); returns in Phase B |
+| Catalog | `src/data/species.json` (A2, 130 species), read by `/api/species` (A3) | Same |
+| Media | Cloudflare R2, `https://media.gcraighobbs.com` (A3) | Same |
+| Generation | None; the stubs and routes were deleted in A3 | Returns in Phase B |
 | Analytics | Vercel Analytics (`layout.tsx`, `useGalleryAnalytics`) | Same |
 
 Vercel auto-deploys every push to `main` and builds a preview per branch. Hobby allows crons at most once a day; there is no cron now.
+
+## Read path
+
+- `src/lib/catalog.ts` loads `species.json` and maps each entry to a `GallerySpecies`: the catalog fields plus `image_url` (`media_base` + `/` + `image_key`) and, only when `video_key` is not null, `video_url`. Sorted by `common_name`
+- `GET /api/species` returns `{ species, count }`, `force-static`, so it is built once per deploy
+- `/gallery` loads it on mount and reloads it every 5 minutes, keeping the current selection. `/display` (images) and `/exhibit` (videos) load it once and cycle every 5 s
+- A species with no video (Round Island Burrowing Boa) shows its image and no video button; `/exhibit` skips it
+- No database, no realtime, nothing that can pause
+
+## Middleware
+
+`src/middleware.ts`, matcher `/api/:path*`. 403 for `/api/admin` and `/api/cron`, any method; 405 for any other `/api` request that is not GET, HEAD or OPTIONS. No password, no env var. `/admin` is not matched, so it is a plain 404. A route that writes needs a real auth design first (Phase B).
 
 ## Commands
 
@@ -39,41 +51,34 @@ Vercel auto-deploys every push to `main` and builds a preview per branch. Hobby 
 - `npm run verify:catalog`: offline check of `src/data/species.json`; also runs as `prebuild` on every build
 - `npm run verify:media`: HEADs every catalog key on the R2 media domain (network). Not in the build; run it after any key change
 - The catalog is edited by hand; how it was built, the pick rules and the known gaps are in `docs/CATALOG.md`
-- `npx tsc --noEmit --incremental false` for a type check (10 known errors, F-05)
-- The build skips type and lint errors (`next.config.js`, F-05), so run both checks yourself
+- `npx tsc --noEmit --incremental false` for a type check (0 errors since A3)
+- Type and lint errors fail the build (`next.config.js`, since A3); lint warnings do not
 
 ## Env
 
-- The build needs `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` because 28 modules create a Supabase client at load (F-10). Vercel holds placeholder values; A3 removes them
-- Also read in `src`: `MONITORING_WEBHOOK_URL`, `ALERT_WEBHOOK_URL`, `CRON_SECRET`, `NODE_ENV`
-- `.env*.example` hold placeholders only and stay tracked; every other `.env*` file is ignored
+- Nothing in `src` reads an environment variable. The build and the app need none
+- The three placeholder Supabase variables in Vercel are no longer read and can be removed
+- `.env*.example` hold a comment only and stay tracked; every other `.env*` file is ignored
 
 ## File map
 
 ```
-src/app/                 pages: / (page.tsx), admin, demo, display, exhibit, gallery, landing, simple, test; layout.tsx
-src/app/api/             46 route handlers, none with inbound auth (F-04)
-  admin/                 29 maintenance routes (fix-*, reset-*, migrate-*, restore-*, init-*, ...)
-  species/               GET list; [id]/media GET; [id]/media/[mediaType]/[version] DELETE, PATCH
-  generate/              image, video, demo-image: all return 503
-  cron/cycle-check/      no longer scheduled; calls a removed method (F-05)
-  (others)               import and load routes, queue/status, species-lists, sse, health, test-connection, analyze-overlap
-src/components/          SpeciesDisplay (gallery), AdminPanel, MediaModal, MediaNavigator, RealTimeNotifications, VideoGallery
-src/hooks/               useAutoErrorRecovery, useGalleryAnalytics, useRealTimeUpdates
-src/lib/                 supabase.ts, media-storage.ts, csv-import.ts, new-csv-import.ts, error-recovery.ts,
-                         monitoring.ts, generation-queue.ts
-                         stubs: generation-service.ts, replicate.ts, image-generator.ts, video-generator.ts
-src/types/               index.ts (also Catalog, CatalogSpecies for species.json)
+src/app/                 pages: / (redirects to /landing), landing, gallery, display (image slides),
+                         exhibit (video slides); layout.tsx (title "Entity: a gallery of extinct species")
+src/app/api/species/     route.ts: GET, force-static; the only route
+src/middleware.ts        403 on /api/admin and /api/cron, 405 on any /api write method
+src/components/          SpeciesDisplay (/display), VideoGallery (/exhibit)
+src/hooks/               useGalleryAnalytics
+src/lib/                 catalog.ts: species.json to GallerySpecies with media URLs
+src/types/               index.ts: Catalog, CatalogSpecies, GallerySpecies
 src/data/species.json    the species catalog, source of truth (A2)
 scripts/                 verify-catalog.mjs (prebuild), verify-media.mjs
-database/                schema.sql, migrations 001 to 005 with rollbacks, security and verify SQL (reference for A2, A3)
-data/                    133 extinct species.csv and .xlsx, extinct_species_database.csv (the 238 list);
-                         superseded by species.json, still read by 9 routes (F-21)
-public/                  create-next-app starter SVGs, unused
+database/                schema.sql, migrations 001 to 005 with rollbacks, security and verify SQL (2025 reference)
 docs/ASSESSMENT.md       findings ledger
 docs/CATALOG.md          catalog source, dedupe and pick rules, known gaps
 docs/archive/            77 notes from the 2025 build, README-2025.md
-docs/archive/scripts/    5 JS and 2 SQL scripts from 2025 (the Supabase ones are listed for A3)
+docs/archive/data/       133 extinct species.csv and .xlsx, extinct_species_database.csv (the 238 list);
+                         superseded by species.json, kept as provenance (moved from data/ in A3)
 root                     README.md, CLAUDE.md, next.config.js, vercel.json, package.json, tsconfig.json,
                          eslint.config.mjs, postcss.config.mjs, tailwind.config.ts, .env*.example
 ```
