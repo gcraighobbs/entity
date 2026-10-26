@@ -1,18 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove static export configuration for Vercel deployment
-  images: {
-    domains: ['replicate.delivery', 'otkvdkbqsmrxzxyojlis.supabase.co'],
-    unoptimized: false
-  },
-  // Fix deprecated experimental config
-  serverExternalPackages: ['@supabase/supabase-js'],
-  // Disable ESLint and TypeScript checking during build
+  // Type and lint errors fail the build
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 };
 

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Entity v1.0 - AI-Powered Extinct Species Generator",
+  title: "Entity: a gallery of extinct species",
   description: "An AI-powered gallery installation that generates images and videos of extinct species using cutting-edge AI technology.",
 };
 
