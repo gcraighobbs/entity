@@ -39,7 +39,7 @@
 ## Where it came from
 
 - Rows: the `species` table from the Jun 2026 Supabase backup, 136 rows. `species_media` and `species_lists` were not in the backup, so the 2025 per-version picks and the 129-species exhibit list are lost
-- The 136 rows are 3 seed rows (Jul 23, 2025) plus a 133-row CSV import (Jul 24, 2025), the same data as `data/133 extinct species.csv`. They hold 130 distinct scientific names
+- The 136 rows are 3 seed rows (Jul 23, 2025) plus a 133-row CSV import (Jul 24, 2025), the same data as `docs/archive/data/133 extinct species.csv`. They hold 130 distinct scientific names
 - Media: the 257 PNGs and 254 MP4s copied to R2 under `images/` and `videos/` with their 2025 file names. Files for 14 species outside the 130 (Alpine Newt to Cape Platanna, from the 238-species list) are in R2 but not in the catalog
 
 ## Dedupe (136 to 130)

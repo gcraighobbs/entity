@@ -1,6 +1,6 @@
 # Assessment
 
-Findings ledger for the Entity repo. Seeded from the A1 step 0 sweep (Oct 24, 2026). Ids never change and are not push labels; a closed finding keeps its id and records what closed it. Paths are as they stand after A1.
+Findings ledger for the Entity repo. Seeded from the A1 step 0 sweep (Oct 24, 2026). Ids never change and are not push labels; a closed finding keeps its id and records what closed it. Paths are as they stood when each finding was logged.
 
 Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with the push that fixed it).
 
@@ -9,24 +9,24 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 | F-01 | critical | partly fixed (A1) | Supabase service_role and anon keys in public history | to-do (rotation) |
 | F-02 | medium | partly fixed (A1) | CRON_SECRET value in public history | to-do (old Vercel project) |
 | F-03 | high | fixed (A1) | Secret scanning, push protection, Dependabot alerts were off | A1 |
-| F-04 | high | open | No inbound auth on any API route | A3 |
-| F-05 | medium | open | Build ignores type and lint errors that exist | A3 |
-| F-06 | low | open | next.config.js and scripts lag Next.js 15.5 | A3 |
-| F-07 | low | open | Unused dependencies: node-cron, replicate | A3 |
-| F-08 | medium | open | Generation is stubbed; fal has no code; old keys unverified | A3, to-do |
+| F-04 | high | fixed (A3) | No inbound auth on any API route | A3 |
+| F-05 | medium | fixed (A3) | Build ignores type and lint errors that exist | A3 |
+| F-06 | low | partly fixed (A3) | next.config.js and scripts lag Next.js 15.5 | A3 (config), A3a (export script) |
+| F-07 | low | open | Unused dependencies: node-cron, replicate (more since A3) | A3a |
+| F-08 | medium | partly fixed (A3) | Generation is stubbed; fal has no code; old keys unverified | A3 (code), to-do (keys) |
 | F-09 | medium | fixed (A1) | .gitignore missed a plain .env | A1 |
-| F-10 | medium | open | 28 modules create a Supabase client at load | A3 |
-| F-11 | low | open | Gallery page creates a Supabase client on every render | A3 |
-| F-12 | low | open | GENERATION_CYCLE_MINUTES is set but never read | A3 |
+| F-10 | medium | fixed (A3) | 28 modules create a Supabase client at load | A3 |
+| F-11 | low | fixed (A3) | Gallery page creates a Supabase client on every render | A3 |
+| F-12 | low | fixed (A3) | GENERATION_CYCLE_MINUTES is set but never read | A3 |
 | F-13 | low | open | Env var list on the architecture page is wrong | A1 closeout (advisor, Notion) |
 | F-14 | medium | fixed (A1) | No git identity; A0 commits carry a hostname address | A1 |
 | F-15 | low | fixed (A1) | Stale Vercel bot PR #1 | A1 |
 | F-16 | medium | open | GitHub Pages still serves the 2025 site | A4 |
-| F-17 | low | partly fixed (A1) | Legacy root markdown and Supabase scripts | A1 (markdown), A3 (scripts) |
+| F-17 | low | fixed (A3) | Legacy root markdown and Supabase scripts | A1 (markdown), A3 (scripts) |
 | F-18 | low | fixed (A1) | README described the 2025 generator | A1 |
-| F-19 | low | open | public/ holds only unused starter SVGs | A3 |
-| F-20 | low | open | package.json name is still entity-temp | A3 |
-| F-21 | low | open | Nine routes still read the data/ CSVs that species.json supersedes | A3 |
+| F-19 | low | fixed (A3) | public/ holds only unused starter SVGs | A3 |
+| F-20 | low | open | package.json name is still entity-temp | A3a |
+| F-21 | low | fixed (A3) | Nine routes still read the data/ CSVs that species.json supersedes | A3 |
 
 ---
 
@@ -57,42 +57,42 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 ### F-04: No inbound auth on any API route
 
 - Severity: high
-- Status: open
+- Status: fixed (A3)
 - Where: all 46 handlers under `src/app/api/`; there is no `middleware.ts`, and the `/admin` page has no gate
 - What: the 29 routes under `/api/admin` write, reset, migrate or delete data with the service role key. Writes outside admin: `species/[id]/media/[mediaType]/[version]` (DELETE, PATCH), `import-133-species`, `simple-import-133`, `import-new-species`, `load-data` (POST), `species-lists` and `queue/status` (GET, POST). `cron/cycle-check` checks `CRON_SECRET` only when it is set, so it fails open. The only reason this is harmless today is that the Supabase variables are placeholders
-- Closes in: A3 (guard every admin route or remove it)
+- Closed by: A3 deleted every route except `GET /api/species` (static), so no route writes. `src/middleware.ts` (matcher `/admin/:path*` and `/api/:path*`) answers 403 to `/admin`, `/api/admin` and `/api/cron` and 405 to any other `/api` method than GET, HEAD or OPTIONS, with no password or env var. The `/admin` page was deleted
 
 ### F-05: The build hides real type and lint errors
 
 - Severity: medium
-- Status: open
+- Status: fixed (A3)
 - Where: `next.config.js:11-16` (`eslint.ignoreDuringBuilds`, `typescript.ignoreBuildErrors`)
 - What: `tsc --noEmit` reports 10 errors. Four routes call `GenerationService` methods that no longer exist and would throw at runtime: `api/admin/advance-species/route.ts:6`, `api/admin/start-cycling/route.ts:6`, `api/admin/stop-cycling/route.ts:6`, `api/cron/cycle-check/route.ts:18`. Three are type mismatches: `api/load-data/route.ts:35`, `lib/csv-import.ts:45`, `lib/new-csv-import.ts:51`. Three are in Next's generated route types (the `fix-species-issues` POST return type, the `sse` route exports). ESLint reports 8 errors and 86 warnings
-- Closes in: A3, which removes most of these routes; then turn both checks back on
+- Closed by: A3 deleted every file with an error and escaped the apostrophe in `landing/page.tsx`; tsc and lint report 0 errors (lint keeps 11 warnings: `<img>`, hook dependencies, an unused prop). `next.config.js` now sets both flags to false, so errors fail the build
 
 ### F-06: Config lags Next.js 15.5
 
 - Severity: low
-- Status: open
+- Status: partly fixed (A3)
 - Where: `next.config.js:4-7`, `package.json:9-10`
 - What: `images.domains` is deprecated in favour of `remotePatterns`. The images block is also dead: `next/image` is not imported anywhere (the app uses `<img>`). It lists `replicate.delivery` and the Supabase host. `next lint` is deprecated in 15.5 and removed in 16. The `export` script is just `next build`
-- Closes in: A3 (add the R2 domain only if `next/image` is adopted)
+- Fixed in A3: the `images` block and `serverExternalPackages` are gone; the app keeps `<img>`, so no R2 `remotePatterns`. Left for A3a: the `export` script (package.json). `next lint` waits for Next.js 16
 
 ### F-07: Unused dependencies
 
 - Severity: low
 - Status: open
 - Where: `package.json:20` (`node-cron`), `:31` (`@types/node-cron`), `:24` (`replicate`)
-- What: none of the three is imported anywhere
-- Closes in: A3
+- What: none of the three is imported anywhere. Since A3 these are unused too: `@supabase/supabase-js`, `@tanstack/react-query`, `dotenv` (never imported), `csv-parse`, `papaparse` and `@types/papaparse`, `uuid` and `@types/uuid`
+- Closes in: A3a (package.json and the lockfile are out of scope for A3)
 
 ### F-08: Generation is stubbed; old keys unverified
 
 - Severity: medium
-- Status: open
+- Status: partly fixed (A3)
 - Where: `src/lib/replicate.ts`, `generation-service.ts`, `image-generator.ts`, `video-generator.ts`; `src/app/api/generate/*`
 - What: generation was disabled after the Aug 25, 2025 incident (`docs/archive/SECURITY_INCIDENT_REPORT.md`). The lib modules throw, the routes return 503, and `REPLICATE_API_TOKEN` is read nowhere. fal has no code, only docs. No Replicate or fal key was ever committed. The brief's note that those keys sit in the old Vercel env cannot be checked from the repo
-- Closes in: A3 (delete the dead code); to-do (confirm the Replicate and fal keys are revoked)
+- Fixed in A3: the four stubs, `generation-queue.ts`, `api/generate/*`, `api/cron/cycle-check` and the cycling admin routes are deleted. Still open: confirm the Replicate and fal keys are revoked (to-do)
 
 ### F-09: .gitignore missed a plain .env
 
@@ -105,26 +105,26 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 ### F-10: Supabase clients created at module load
 
 - Severity: medium
-- Status: open
+- Status: fixed (A3)
 - Where: 28 files in `src` call `createClient` at the top level with `!` on the env vars: 21 admin routes, `generate/demo-image`, `species/route.ts`, both `species/[id]/media` routes, and `lib/error-recovery.ts`, `lib/image-generator.ts`, `lib/video-generator.ts`
 - What: without the three Supabase variables the build fails at module load, which is why Vercel holds placeholders. 31 files import `@supabase/supabase-js` (those 28, plus `lib/supabase.ts`, which creates its clients conditionally, `test-connection`, and the gallery page), and 9 more import `@/lib/supabase`: 40 in all
-- Closes in: A3 (reads move to `species.json`; then the placeholders leave Vercel)
+- Closed by: A3 deleted all 28 modules, `lib/supabase.ts` and every importer; nothing in `src` mentions Supabase. The build passes with the three variables unset. The placeholders can now be removed from Vercel
 
 ### F-11: Gallery creates a Supabase client on every render
 
 - Severity: low
-- Status: open
+- Status: fixed (A3)
 - Where: `src/app/gallery/page.tsx:95`
 - What: a browser client is created in the component body, so a new one on every render, and in production it points at the placeholder URL
-- Closes in: A3
+- Closed by: A3 removed the client and the realtime subscriptions; the gallery reads `/api/species` and reloads it every 5 minutes
 
 ### F-12: GENERATION_CYCLE_MINUTES is never read
 
 - Severity: low
-- Status: open
+- Status: fixed (A3)
 - Where: `vercel.json:7-9`, both `.env*.example` files
 - What: nothing in `src` reads it
-- Closes in: A3
+- Closed by: A3 removed the `env` block from `vercel.json`; both `.env*.example` files now hold only a comment, since nothing reads any variable
 
 ### F-13: Env var list on the architecture page
 
@@ -161,10 +161,10 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 ### F-17: Legacy root files
 
 - Severity: low
-- Status: partly fixed (A1)
+- Status: fixed (A3)
 - Where: `docs/archive/` (77 markdown files), `docs/archive/scripts/` (5 JS, 2 SQL)
 - What: none was referenced by code, config or package.json scripts. Scripts that use the Supabase service role: `restore-missing-species.js` (insert), `run-migrations.js` (rpc), `update-baiji-name.js` (update). `check-eastern-elk.js` and `import-133-species.js` call the local API. `fix-security-vulnerabilities.sql` and `import-133-direct.sql` are hand-run SQL
-- Closed by: A1 moved the markdown. The scripts stay open for A3 (delete them or keep them as reference once Supabase is gone)
+- Closed by: A1 moved the markdown. A3 deleted `docs/archive/scripts/`
 
 ### F-18: README described the 2025 generator
 
@@ -177,10 +177,10 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 ### F-19: public/ holds unused starter SVGs
 
 - Severity: low
-- Status: open
+- Status: fixed (A3)
 - Where: `public/file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg`
 - What: create-next-app leftovers, referenced nowhere. No media is tracked anywhere in the repo
-- Closes in: A3
+- Closed by: A3 deleted all five; `public/` no longer exists
 
 ### F-20: package name is still entity-temp
 
@@ -188,12 +188,12 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 - Status: open
 - Where: `package.json:2`
 - What: the package is named `entity-temp`
-- Closes in: A3 (package.json is out of scope for A1)
+- Closes in: A3a (package.json is out of scope for A1 and A3)
 
 ### F-21: Routes read the data/ CSVs that species.json supersedes
 
 - Severity: low
-- Status: open
+- Status: fixed (A3)
 - Where: `api/import-133-species/route.ts:11`, `api/simple-import-133/route.ts:65`, `api/load-data/route.ts:9`, `api/admin/fix-species-types/route.ts:30`, `api/admin/load-species-data/route.ts:15`, `api/admin/debug-species-count/route.ts:39`, `api/admin/import-csv-data/route.ts:28`, `api/admin/fix-data-accuracy/route.ts:42`, `api/admin/restore-132-species/route.ts:47` (all under `src/app/`)
 - What: since A2 the catalog is `src/data/species.json` (`docs/CATALOG.md`). These routes still parse `data/133 extinct species.csv` or `data/extinct_species_database.csv` and all but `debug-species-count` write the result to Supabase, so they would rebuild a second, divergent catalog. All are unauthenticated (F-04). The `data/` files stay as provenance
-- Closes in: A3 (remove or guard the routes with the other admin and import routes; then decide whether `data/` moves to `docs/archive/`)
+- Closed by: A3 deleted all nine routes with the other admin and import routes, and moved `data/` to `docs/archive/data/` as provenance. `src/lib/media-storage.ts` was deleted rather than repointed at R2: media URLs are `media_base` plus the key (`src/lib/catalog.ts`)

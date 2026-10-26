@@ -105,7 +105,7 @@ export default function LandingPage() {
                   Launched in August 2025, <em>Entity</em> is an AI-powered extinct species generator created by artist and professor G. Craig Hobbs with design and AI development by David Martin.
                 </p>
                 <p style={{ marginBottom: '20px' }}>
-                  Compiled from AI generated lists compiled using Anthropic's <a href="https://www.anthropic.com/claude" style={{ color: '#60a5fa', textDecoration: 'none' }}>Claude</a>, the work regenerates images and videos of extinct species, date of extinction, location, and cause. <em><a href="https://entity-gamma.vercel.app/landing" style={{ color: '#60a5fa', textDecoration: 'none' }}>Entity</a></em> provides users a navigable database of AI-regenerated species as form of reflection on extinction, art and science through species that are no longer with us.
+                  Compiled from AI generated lists compiled using Anthropic&apos;s <a href="https://www.anthropic.com/claude" style={{ color: '#60a5fa', textDecoration: 'none' }}>Claude</a>, the work regenerates images and videos of extinct species, date of extinction, location, and cause. <em><a href="/gallery" style={{ color: '#60a5fa', textDecoration: 'none' }}>Entity</a></em> provides users a navigable database of AI-regenerated species as form of reflection on extinction, art and science through species that are no longer with us.
                 </p>
               </div>
             </motion.div>
@@ -155,7 +155,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 1.4 }}
             style={{ fontSize: '12px', color: '#666', fontWeight: '300', lineHeight: '1.4' }}
           >
-            <a href="https://entity-gamma.vercel.app/landing" style={{ color: '#666', textDecoration: 'none' }}>Entity</a> © 2025 by{' '}
+            <a href="/gallery" style={{ color: '#666', textDecoration: 'none' }}>Entity</a> © 2025 by{' '}
             <a href="https://creativecommons.org/" style={{ color: '#666', textDecoration: 'none' }}>G. Craig Hobbs, David Martin</a> is licensed under{' '}
             <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" style={{ color: '#666', textDecoration: 'none' }}>CC BY-NC-ND 4.0</a>
             <div style={{ display: 'inline-flex', alignItems: 'center', marginLeft: '8px' }}>
