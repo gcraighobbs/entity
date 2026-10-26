@@ -26,6 +26,7 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 | F-18 | low | fixed (A1) | README described the 2025 generator | A1 |
 | F-19 | low | open | public/ holds only unused starter SVGs | A3 |
 | F-20 | low | open | package.json name is still entity-temp | A3 |
+| F-21 | low | open | Nine routes still read the data/ CSVs that species.json supersedes | A3 |
 
 ---
 
@@ -188,3 +189,11 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 - Where: `package.json:2`
 - What: the package is named `entity-temp`
 - Closes in: A3 (package.json is out of scope for A1)
+
+### F-21: Routes read the data/ CSVs that species.json supersedes
+
+- Severity: low
+- Status: open
+- Where: `api/import-133-species/route.ts:11`, `api/simple-import-133/route.ts:65`, `api/load-data/route.ts:9`, `api/admin/fix-species-types/route.ts:30`, `api/admin/load-species-data/route.ts:15`, `api/admin/debug-species-count/route.ts:39`, `api/admin/import-csv-data/route.ts:28`, `api/admin/fix-data-accuracy/route.ts:42`, `api/admin/restore-132-species/route.ts:47` (all under `src/app/`)
+- What: since A2 the catalog is `src/data/species.json` (`docs/CATALOG.md`). These routes still parse `data/133 extinct species.csv` or `data/extinct_species_database.csv` and all but `debug-species-count` write the result to Supabase, so they would rebuild a second, divergent catalog. All are unauthenticated (F-04). The `data/` files stay as provenance
+- Closes in: A3 (remove or guard the routes with the other admin and import routes; then decide whether `data/` moves to `docs/archive/`)

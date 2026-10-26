@@ -26,7 +26,7 @@ Read this first in every session. This repo is the source of truth for Entity's 
 | Frontend | Next.js 15.5.28 (app router), React 19.1.10, TypeScript 5, Tailwind 4, Framer Motion 12 | Same |
 | Backend | Next.js route handlers (46, no inbound auth) | Read-only routes; admin routes guarded or removed (A3) |
 | Hosting | Vercel Hobby, project `entity`, team `gcraighobbs-projects`, production `entity-three.vercel.app` | Same, then the custom domain (A4) |
-| Catalog | Supabase Postgres, paused | `species.json` in the repo (A2, A3) |
+| Catalog | `src/data/species.json` (A2, 130 species); the app still reads Supabase, paused | App reads `species.json` (A3) |
 | Media | Supabase Storage, paused | Cloudflare R2, custom media domain (A3) |
 | Generation | Replicate and fal code already stubbed (throws or returns 503) | Removed (A3); returns in Phase B |
 | Analytics | Vercel Analytics (`layout.tsx`, `useGalleryAnalytics`) | Same |
@@ -36,6 +36,9 @@ Vercel auto-deploys every push to `main` and builds a preview per branch. Hobby 
 ## Commands
 
 - `npm run dev`, `npm run build`, `npm run lint` (`next lint` is deprecated in 15.5)
+- `npm run verify:catalog`: offline check of `src/data/species.json`; also runs as `prebuild` on every build
+- `npm run verify:media`: HEADs every catalog key on the R2 media domain (network). Not in the build; run it after any key change
+- The catalog is edited by hand; how it was built, the pick rules and the known gaps are in `docs/CATALOG.md`
 - `npx tsc --noEmit --incremental false` for a type check (10 known errors, F-05)
 - The build skips type and lint errors (`next.config.js`, F-05), so run both checks yourself
 
@@ -60,11 +63,15 @@ src/hooks/               useAutoErrorRecovery, useGalleryAnalytics, useRealTimeU
 src/lib/                 supabase.ts, media-storage.ts, csv-import.ts, new-csv-import.ts, error-recovery.ts,
                          monitoring.ts, generation-queue.ts
                          stubs: generation-service.ts, replicate.ts, image-generator.ts, video-generator.ts
-src/types/               index.ts
+src/types/               index.ts (also Catalog, CatalogSpecies for species.json)
+src/data/species.json    the species catalog, source of truth (A2)
+scripts/                 verify-catalog.mjs (prebuild), verify-media.mjs
 database/                schema.sql, migrations 001 to 005 with rollbacks, security and verify SQL (reference for A2, A3)
-data/                    133 extinct species.csv and .xlsx, extinct_species_database.csv
+data/                    133 extinct species.csv and .xlsx, extinct_species_database.csv (the 238 list);
+                         superseded by species.json, still read by 9 routes (F-21)
 public/                  create-next-app starter SVGs, unused
 docs/ASSESSMENT.md       findings ledger
+docs/CATALOG.md          catalog source, dedupe and pick rules, known gaps
 docs/archive/            77 notes from the 2025 build, README-2025.md
 docs/archive/scripts/    5 JS and 2 SQL scripts from 2025 (the Supabase ones are listed for A3)
 root                     README.md, CLAUDE.md, next.config.js, vercel.json, package.json, tsconfig.json,
