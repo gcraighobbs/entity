@@ -11,8 +11,8 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 | F-03 | high | fixed (A1) | Secret scanning, push protection, Dependabot alerts were off | A1 |
 | F-04 | high | fixed (A3) | No inbound auth on any API route | A3 |
 | F-05 | medium | fixed (A3) | Build ignores type and lint errors that exist | A3 |
-| F-06 | low | partly fixed (A3) | next.config.js and scripts lag Next.js 15.5 | A3 (config), A3a (export script) |
-| F-07 | low | open | Unused dependencies: node-cron, replicate (more since A3) | A3a |
+| F-06 | low | partly fixed (A3, A3a) | next.config.js and scripts lag Next.js 15.5 | A3 (config), A3a (export script), A3b (next lint) |
+| F-07 | low | fixed (A3a) | Unused dependencies: node-cron, replicate (more since A3) | A3a |
 | F-08 | medium | partly fixed (A3) | Generation is stubbed; fal has no code; old keys unverified | A3 (code), to-do (keys) |
 | F-09 | medium | fixed (A1) | .gitignore missed a plain .env | A1 |
 | F-10 | medium | fixed (A3) | 28 modules create a Supabase client at load | A3 |
@@ -25,7 +25,7 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 | F-17 | low | fixed (A3) | Legacy root markdown and Supabase scripts | A1 (markdown), A3 (scripts) |
 | F-18 | low | fixed (A1) | README described the 2025 generator | A1 |
 | F-19 | low | fixed (A3) | public/ holds only unused starter SVGs | A3 |
-| F-20 | low | open | package.json name is still entity-temp | A3a |
+| F-20 | low | fixed (A3a) | package.json name is still entity-temp | A3a |
 | F-21 | low | fixed (A3) | Nine routes still read the data/ CSVs that species.json supersedes | A3 |
 
 ---
@@ -73,18 +73,18 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 ### F-06: Config lags Next.js 15.5
 
 - Severity: low
-- Status: partly fixed (A3)
+- Status: partly fixed (A3, A3a)
 - Where: `next.config.js:4-7`, `package.json:9-10`
 - What: `images.domains` is deprecated in favour of `remotePatterns`. The images block is also dead: `next/image` is not imported anywhere (the app uses `<img>`). It lists `replicate.delivery` and the Supabase host. `next lint` is deprecated in 15.5 and removed in 16. The `export` script is just `next build`
-- Fixed in A3: the `images` block and `serverExternalPackages` are gone; the app keeps `<img>`, so no R2 `remotePatterns`. Left for A3a: the `export` script (package.json). `next lint` waits for Next.js 16
+- Fixed in A3: the `images` block and `serverExternalPackages` are gone; the app keeps `<img>`, so no R2 `remotePatterns`. Fixed in A3a: the `export` script is dropped from `package.json`. Still open: `next lint`, for A3b (Next.js 16)
 
 ### F-07: Unused dependencies
 
 - Severity: low
-- Status: open
+- Status: fixed (A3a)
 - Where: `package.json:20` (`node-cron`), `:31` (`@types/node-cron`), `:24` (`replicate`)
 - What: none of the three is imported anywhere. Since A3 these are unused too: `@supabase/supabase-js`, `@tanstack/react-query`, `dotenv` (never imported), `csv-parse`, `papaparse` and `@types/papaparse`, `uuid` and `@types/uuid`
-- Closes in: A3a (package.json and the lockfile are out of scope for A3)
+- Closed by: A3a uninstalled all 11 packages (`@supabase/supabase-js`, `@tanstack/react-query`, `csv-parse`, `dotenv`, `node-cron`, `papaparse`, `replicate`, `uuid`, `@types/node-cron`, `@types/papaparse`, `@types/uuid`). The `ws`, `uuid` and `csv-parse` audit findings left with them
 
 ### F-08: Generation is stubbed; old keys unverified
 
@@ -108,7 +108,7 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 - Status: fixed (A3)
 - Where: 28 files in `src` call `createClient` at the top level with `!` on the env vars: 21 admin routes, `generate/demo-image`, `species/route.ts`, both `species/[id]/media` routes, and `lib/error-recovery.ts`, `lib/image-generator.ts`, `lib/video-generator.ts`
 - What: without the three Supabase variables the build fails at module load, which is why Vercel holds placeholders. 31 files import `@supabase/supabase-js` (those 28, plus `lib/supabase.ts`, which creates its clients conditionally, `test-connection`, and the gallery page), and 9 more import `@/lib/supabase`: 40 in all
-- Closed by: A3 deleted all 28 modules, `lib/supabase.ts` and every importer; nothing in `src` mentions Supabase. The build passes with the three variables unset. The placeholders can now be removed from Vercel
+- Closed by: A3 deleted all 28 modules, `lib/supabase.ts` and every importer; nothing in `src` mentions Supabase. The build passes with the three variables unset. The placeholders were removed from Vercel on Oct 26
 
 ### F-11: Gallery creates a Supabase client on every render
 
@@ -185,10 +185,10 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 ### F-20: package name is still entity-temp
 
 - Severity: low
-- Status: open
+- Status: fixed (A3a)
 - Where: `package.json:2`
 - What: the package is named `entity-temp`
-- Closes in: A3a (package.json is out of scope for A1 and A3)
+- Closed by: A3a renamed the package to `entity` in `package.json` and the lockfile
 
 ### F-21: Routes read the data/ CSVs that species.json supersedes
 

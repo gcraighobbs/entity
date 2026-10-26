@@ -53,11 +53,12 @@ Vercel auto-deploys every push to `main` and builds a preview per branch. Hobby 
 - The catalog is edited by hand; how it was built, the pick rules and the known gaps are in `docs/CATALOG.md`
 - `npx tsc --noEmit --incremental false` for a type check (0 errors since A3)
 - Type and lint errors fail the build (`next.config.js`, since A3); lint warnings do not
+- Install scripts run only for packages in `allowScripts` in `package.json` (A3a: `@tailwindcss/oxide`, `unrs-resolver`). Approvals are pinned to a version, so any bump to either needs `npm install-scripts approve` again (A3b will hit this); `npm install-scripts ls` should come back empty
 
 ## Env
 
 - Nothing in `src` reads an environment variable. The build and the app need none
-- The three placeholder Supabase variables in Vercel are no longer read and can be removed
+- Vercel has no environment variables; the three placeholder Supabase variables were removed Oct 26
 - `.env*.example` hold a comment only and stay tracked; every other `.env*` file is ignored
 
 ## File map
