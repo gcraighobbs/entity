@@ -2,25 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface Species {
-  id: string;
-  scientific_name: string;
-  common_name: string;
-  year_extinct: string;
-  last_location: string;
-  extinction_cause: string;
-  supabase_video_url?: string;
-  video_url?: string;
-  generation_status: string;
-}
+import { GallerySpecies } from '@/types';
 
 interface VideoGalleryProps {
   className?: string;
 }
 
 export default function VideoGallery({ className = '' }: VideoGalleryProps) {
-  const [species, setSpecies] = useState<Species[]>([]);
+  const [species, setSpecies] = useState<GallerySpecies[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
@@ -47,9 +36,7 @@ export default function VideoGallery({ className = '' }: VideoGalleryProps) {
       
       if (data.species && Array.isArray(data.species)) {
         // Filter species that have videos
-        const speciesWithVideos = data.species.filter((s: Species) => 
-          s.supabase_video_url || s.video_url
-        );
+        const speciesWithVideos = data.species.filter((s: GallerySpecies) => s.video_url);
         
         setSpecies(speciesWithVideos);
         
@@ -65,10 +52,6 @@ export default function VideoGallery({ className = '' }: VideoGalleryProps) {
       console.error('Error loading species:', error);
       setIsLoading(false);
     }
-  };
-
-  const getBestVideoUrl = (species: Species) => {
-    return species.supabase_video_url || species.video_url;
   };
 
   const nextSpecies = () => {
@@ -168,7 +151,7 @@ export default function VideoGallery({ className = '' }: VideoGalleryProps) {
                 </div>
                 <div>
                   <span style={{ color: '#888' }}>Last seen: </span>
-                  <span style={{ color: '#fff' }}>{currentSpecies.last_location}</span>
+                  <span style={{ color: '#fff' }}>{currentSpecies.last_seen}</span>
                 </div>
                 <div>
                   <span style={{ color: '#888' }}>Cause: </span>
@@ -190,10 +173,10 @@ export default function VideoGallery({ className = '' }: VideoGalleryProps) {
         position: 'relative'
       }}>
         <AnimatePresence mode="wait">
-          {currentSpecies && getBestVideoUrl(currentSpecies) && (
+          {currentSpecies && currentSpecies.video_url && (
             <motion.video
               key={`video-${currentSpecies.id}`}
-              src={getBestVideoUrl(currentSpecies)}
+              src={currentSpecies.video_url}
               autoPlay
               loop
               muted
@@ -209,15 +192,7 @@ export default function VideoGallery({ className = '' }: VideoGalleryProps) {
                 borderRadius: '12px',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)'
               }}
-              onError={(e) => {
-                console.error('Video failed to load:', getBestVideoUrl(currentSpecies));
-                // Try fallback URL if Supabase URL fails
-                const currentSrc = (e.target as HTMLVideoElement).src;
-                if (currentSpecies.supabase_video_url && currentSrc === currentSpecies.supabase_video_url && currentSpecies.video_url) {
-                  console.log('Falling back to Replicate URL for video');
-                  (e.target as HTMLVideoElement).src = currentSpecies.video_url;
-                }
-              }}
+              onError={() => console.error('Video failed to load:', currentSpecies.video_url)}
             />
           )}
         </AnimatePresence>

@@ -2,25 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface Species {
-  id: string;
-  scientific_name: string;
-  common_name: string;
-  year_extinct: string;
-  last_location: string;
-  extinction_cause: string;
-  supabase_image_url?: string;
-  image_url?: string;
-  generation_status: string;
-}
+import { GallerySpecies } from '@/types';
 
 interface SpeciesDisplayProps {
   className?: string;
 }
 
 export default function SpeciesDisplay({ className = '' }: SpeciesDisplayProps) {
-  const [species, setSpecies] = useState<Species[]>([]);
+  const [species, setSpecies] = useState<GallerySpecies[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
@@ -47,9 +36,7 @@ export default function SpeciesDisplay({ className = '' }: SpeciesDisplayProps) 
       
       if (data.species && Array.isArray(data.species)) {
         // Filter species that have images
-        const speciesWithImages = data.species.filter((s: Species) =>
-          s.supabase_image_url || s.image_url
-        );
+        const speciesWithImages = data.species.filter((s: GallerySpecies) => s.image_url);
         
         setSpecies(speciesWithImages);
         
@@ -65,10 +52,6 @@ export default function SpeciesDisplay({ className = '' }: SpeciesDisplayProps) 
       console.error('Error loading species:', error);
       setIsLoading(false);
     }
-  };
-
-  const getBestImageUrl = (species: Species) => {
-    return species.supabase_image_url || species.image_url;
   };
 
   const nextSpecies = () => {
@@ -168,7 +151,7 @@ export default function SpeciesDisplay({ className = '' }: SpeciesDisplayProps) 
                 </div>
                 <div>
                   <span style={{ color: '#888' }}>Last seen: </span>
-                  <span style={{ color: '#fff' }}>{currentSpecies.last_location}</span>
+                  <span style={{ color: '#fff' }}>{currentSpecies.last_seen}</span>
                 </div>
                 <div>
                   <span style={{ color: '#888' }}>Cause: </span>
@@ -190,10 +173,10 @@ export default function SpeciesDisplay({ className = '' }: SpeciesDisplayProps) 
         position: 'relative'
       }}>
         <AnimatePresence mode="wait">
-          {currentSpecies && getBestImageUrl(currentSpecies) && (
+          {currentSpecies && currentSpecies.image_url && (
             <motion.img
               key={`image-${currentSpecies.id}`}
-              src={getBestImageUrl(currentSpecies)}
+              src={currentSpecies.image_url}
               alt={`Generated image of ${currentSpecies.common_name}`}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
