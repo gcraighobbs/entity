@@ -43,7 +43,7 @@ Vercel auto-deploys every push to `main` and builds a preview per branch. Hobby 
 
 ## Middleware
 
-`src/middleware.ts`, matcher `/api/:path*`. 403 for `/api/admin` and `/api/cron`, any method; 405 for any other `/api` request that is not GET, HEAD or OPTIONS. No password, no env var. `/admin` is not matched, so it is a plain 404. A route that writes needs a real auth design first (Phase B).
+`src/middleware.ts`, matcher `['/admin/:path*', '/api/:path*']`. 403 for `/admin`, `/api/admin` and `/api/cron` and anything under them, any method; 405 for any other `/api` request that is not GET, HEAD or OPTIONS. No password, no env var. A route that writes needs a real auth design first (Phase B).
 
 ## Commands
 
@@ -66,7 +66,7 @@ Vercel auto-deploys every push to `main` and builds a preview per branch. Hobby 
 src/app/                 pages: / (redirects to /landing), landing, gallery, display (image slides),
                          exhibit (video slides); layout.tsx (title "Entity: a gallery of extinct species")
 src/app/api/species/     route.ts: GET, force-static; the only route
-src/middleware.ts        403 on /api/admin and /api/cron, 405 on any /api write method
+src/middleware.ts        403 on /admin, /api/admin and /api/cron; 405 on any /api write method
 src/components/          SpeciesDisplay (/display), VideoGallery (/exhibit)
 src/hooks/               useGalleryAnalytics
 src/lib/                 catalog.ts: species.json to GallerySpecies with media URLs

@@ -60,7 +60,7 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 - Status: fixed (A3)
 - Where: all 46 handlers under `src/app/api/`; there is no `middleware.ts`, and the `/admin` page has no gate
 - What: the 29 routes under `/api/admin` write, reset, migrate or delete data with the service role key. Writes outside admin: `species/[id]/media/[mediaType]/[version]` (DELETE, PATCH), `import-133-species`, `simple-import-133`, `import-new-species`, `load-data` (POST), `species-lists` and `queue/status` (GET, POST). `cron/cycle-check` checks `CRON_SECRET` only when it is set, so it fails open. The only reason this is harmless today is that the Supabase variables are placeholders
-- Closed by: A3 deleted every route except `GET /api/species` (static), so no route writes. `src/middleware.ts` (matcher `/api/:path*`) answers 403 to `/api/admin` and `/api/cron` and 405 to any other `/api` method than GET, HEAD or OPTIONS, with no password or env var. The `/admin` page was deleted
+- Closed by: A3 deleted every route except `GET /api/species` (static), so no route writes. `src/middleware.ts` (matcher `/admin/:path*` and `/api/:path*`) answers 403 to `/admin`, `/api/admin` and `/api/cron` and 405 to any other `/api` method than GET, HEAD or OPTIONS, with no password or env var. The `/admin` page was deleted
 
 ### F-05: The build hides real type and lint errors
 

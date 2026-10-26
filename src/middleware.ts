@@ -7,7 +7,7 @@ const READ_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (/^\/api\/(admin|cron)(\/|$)/.test(pathname)) {
+  if (/^\/(admin|api\/admin|api\/cron)(\/|$)/.test(pathname)) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
@@ -22,5 +22,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/:path*'],
+  matcher: ['/admin/:path*', '/api/:path*'],
 };
