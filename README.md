@@ -6,7 +6,7 @@ Entity is a gallery of extinct species: an AI-generated image and video for each
 
 Phase A, the migration, is in progress. The site is moving to Vercel, media to Cloudflare R2, and the species catalog to a JSON file in this repo, so nothing is left that can pause.
 
-Live: [entity-three.vercel.app](https://entity-three.vercel.app) (the gallery shows all 130 species since A3)
+Live: [entityai.org](https://entityai.org) (the gallery shows all 130 species since A3)
 
 ## For contributors
 
