@@ -23,8 +23,8 @@ Read this first in every session. This repo is the source of truth for Entity's 
 
 | Layer | Now | Target (Phase A) |
 | --- | --- | --- |
-| Frontend | Next.js 15.5.28 (app router), React 19.1.10, TypeScript 5, Tailwind 4, Framer Motion 12 | Same |
-| Backend | One route handler, `GET /api/species` (static); `src/middleware.ts` refuses writes (A3) | Same |
+| Frontend | Next.js 16.4.3 (app router, Turbopack), React 19.3.1, TypeScript 5, Tailwind 4, Framer Motion 12 (A3b) | Same |
+| Backend | One route handler, `GET /api/species` (static); `src/proxy.ts` refuses writes (A3; the middleware file until A3b) | Same |
 | Hosting | Vercel Hobby, project `entity`, team `gcraighobbs-projects`, production `entity-three.vercel.app` | Same, then the custom domain (A4) |
 | Catalog | `src/data/species.json` (A2, 130 species), read by `/api/species` (A3) | Same |
 | Media | Cloudflare R2, `https://media.gcraighobbs.com` (A3) | Same |
@@ -41,19 +41,23 @@ Vercel auto-deploys every push to `main` and builds a preview per branch. Hobby 
 - A species with no video (Round Island Burrowing Boa) shows its image and no video button; `/exhibit` skips it
 - No database, no realtime, nothing that can pause
 
-## Middleware
+## Proxy
 
-`src/middleware.ts`, matcher `['/admin/:path*', '/api/:path*']`. 403 for `/admin`, `/api/admin` and `/api/cron` and anything under them, any method; 405 for any other `/api` request that is not GET, HEAD or OPTIONS. No password, no env var. A route that writes needs a real auth design first (Phase B).
+`src/proxy.ts` (Next.js 16's name for middleware; `src/middleware.ts` until A3b), export `proxy`, Node.js runtime, matcher `['/admin/:path*', '/api/:path*']`. 403 for `/admin`, `/api/admin` and `/api/cron` and anything under them, any method; 405 for any other `/api` request that is not GET, HEAD or OPTIONS. No password, no env var. A route that writes needs a real auth design first (Phase B).
+
+OPTIONS on a static route is answered after the proxy lets it through: `next start` returns 405 (`Allow: GET` and `Allow: HEAD`, the same on 15.5), while Vercel answers 204. That 405 is not the proxy's, which sends one `Allow: GET, HEAD, OPTIONS` header.
 
 ## Commands
 
-- `npm run dev`, `npm run build`, `npm run lint` (`next lint` is deprecated in 15.5)
+- `npm run dev`, `npm run build`, `npm run lint`
+- `npm run lint` is `eslint .`, with native flat config in `eslint.config.mjs` (eslint-config-next 16, core-web-vitals and typescript). `next lint` was removed in Next.js 16 (A3b)
+- `npm run build` is `npm run lint && next build`, after `prebuild`. Next.js 16's `next build` no longer lints, so the script is what keeps lint errors fatal
 - `npm run verify:catalog`: offline check of `src/data/species.json`; also runs as `prebuild` on every build
 - `npm run verify:media`: HEADs every catalog key on the R2 media domain (network). Not in the build; run it after any key change
 - The catalog is edited by hand; how it was built, the pick rules and the known gaps are in `docs/CATALOG.md`
 - `npx tsc --noEmit --incremental false` for a type check (0 errors since A3)
-- Type and lint errors fail the build (`next.config.js`, since A3); lint warnings do not
-- Install scripts run only for packages in `allowScripts` in `package.json` (A3a: `@tailwindcss/oxide`, `unrs-resolver`). Approvals are pinned to a version, so any bump to either needs `npm install-scripts approve` again (A3b will hit this); `npm install-scripts ls` should come back empty
+- Type and lint errors fail the build; lint warnings do not. Types: `next build` type-checks (`typescript.ignoreBuildErrors` false in `next.config.js`). Lint: the build script (A3b). The react-hooks 7 rules `set-state-in-effect` and `immutability` are set to warn in `eslint.config.mjs` until a later push fixes the code they flag (18 warnings since A3b)
+- Install scripts run only for packages in `allowScripts` in `package.json` (A3a: `@tailwindcss/oxide`, `unrs-resolver`). Approvals are pinned to a version, so any bump to either needs `npm install-scripts approve` again (A3b left both versions unchanged); `npm install-scripts ls` should come back empty
 
 ## Env
 
@@ -67,7 +71,7 @@ Vercel auto-deploys every push to `main` and builds a preview per branch. Hobby 
 src/app/                 pages: / (redirects to /landing), landing, gallery, display (image slides),
                          exhibit (video slides); layout.tsx (title "Entity: a gallery of extinct species")
 src/app/api/species/     route.ts: GET, force-static; the only route
-src/middleware.ts        403 on /admin, /api/admin and /api/cron; 405 on any /api write method
+src/proxy.ts             403 on /admin, /api/admin and /api/cron; 405 on any /api write method
 src/components/          SpeciesDisplay (/display), VideoGallery (/exhibit)
 src/hooks/               useGalleryAnalytics
 src/lib/                 catalog.ts: species.json to GallerySpecies with media URLs

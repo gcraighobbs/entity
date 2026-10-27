@@ -11,7 +11,7 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 | F-03 | high | fixed (A1) | Secret scanning, push protection, Dependabot alerts were off | A1 |
 | F-04 | high | fixed (A3) | No inbound auth on any API route | A3 |
 | F-05 | medium | fixed (A3) | Build ignores type and lint errors that exist | A3 |
-| F-06 | low | partly fixed (A3, A3a) | next.config.js and scripts lag Next.js 15.5 | A3 (config), A3a (export script), A3b (next lint) |
+| F-06 | low | fixed (A3b) | next.config.js and scripts lag Next.js 15.5 | A3 (config), A3a (export script), A3b (next lint) |
 | F-07 | low | fixed (A3a) | Unused dependencies: node-cron, replicate (more since A3) | A3a |
 | F-08 | medium | partly fixed (A3) | Generation is stubbed; fal has no code; old keys unverified | A3 (code), to-do (keys) |
 | F-09 | medium | fixed (A1) | .gitignore missed a plain .env | A1 |
@@ -60,7 +60,7 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 - Status: fixed (A3)
 - Where: all 46 handlers under `src/app/api/`; there is no `middleware.ts`, and the `/admin` page has no gate
 - What: the 29 routes under `/api/admin` write, reset, migrate or delete data with the service role key. Writes outside admin: `species/[id]/media/[mediaType]/[version]` (DELETE, PATCH), `import-133-species`, `simple-import-133`, `import-new-species`, `load-data` (POST), `species-lists` and `queue/status` (GET, POST). `cron/cycle-check` checks `CRON_SECRET` only when it is set, so it fails open. The only reason this is harmless today is that the Supabase variables are placeholders
-- Closed by: A3 deleted every route except `GET /api/species` (static), so no route writes. `src/middleware.ts` (matcher `/admin/:path*` and `/api/:path*`) answers 403 to `/admin`, `/api/admin` and `/api/cron` and 405 to any other `/api` method than GET, HEAD or OPTIONS, with no password or env var. The `/admin` page was deleted
+- Closed by: A3 deleted every route except `GET /api/species` (static), so no route writes. `src/middleware.ts` (matcher `/admin/:path*` and `/api/:path*`) answers 403 to `/admin`, `/api/admin` and `/api/cron` and 405 to any other `/api` method than GET, HEAD or OPTIONS, with no password or env var. The `/admin` page was deleted. A3b renamed the file to `src/proxy.ts` (Next.js 16), same logic and matcher, now on the Node.js runtime
 
 ### F-05: The build hides real type and lint errors
 
@@ -68,15 +68,16 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 - Status: fixed (A3)
 - Where: `next.config.js:11-16` (`eslint.ignoreDuringBuilds`, `typescript.ignoreBuildErrors`)
 - What: `tsc --noEmit` reports 10 errors. Four routes call `GenerationService` methods that no longer exist and would throw at runtime: `api/admin/advance-species/route.ts:6`, `api/admin/start-cycling/route.ts:6`, `api/admin/stop-cycling/route.ts:6`, `api/cron/cycle-check/route.ts:18`. Three are type mismatches: `api/load-data/route.ts:35`, `lib/csv-import.ts:45`, `lib/new-csv-import.ts:51`. Three are in Next's generated route types (the `fix-species-issues` POST return type, the `sse` route exports). ESLint reports 8 errors and 86 warnings
-- Closed by: A3 deleted every file with an error and escaped the apostrophe in `landing/page.tsx`; tsc and lint report 0 errors (lint keeps 11 warnings: `<img>`, hook dependencies, an unused prop). `next.config.js` now sets both flags to false, so errors fail the build
+- Closed by: A3 deleted every file with an error and escaped the apostrophe in `landing/page.tsx`; tsc and lint report 0 errors (lint keeps 11 warnings: `<img>`, hook dependencies, an unused prop). `next.config.js` now sets both flags to false, so errors fail the build. Since A3b (Next.js 16, where `next build` no longer lints and the `eslint` option is gone), lint errors fail the build through the `build` script (`npm run lint && next build`); type errors still fail `next build`
 
 ### F-06: Config lags Next.js 15.5
 
 - Severity: low
-- Status: partly fixed (A3, A3a)
+- Status: fixed (A3b)
 - Where: `next.config.js:4-7`, `package.json:9-10`
 - What: `images.domains` is deprecated in favour of `remotePatterns`. The images block is also dead: `next/image` is not imported anywhere (the app uses `<img>`). It lists `replicate.delivery` and the Supabase host. `next lint` is deprecated in 15.5 and removed in 16. The `export` script is just `next build`
-- Fixed in A3: the `images` block and `serverExternalPackages` are gone; the app keeps `<img>`, so no R2 `remotePatterns`. Fixed in A3a: the `export` script is dropped from `package.json`. Still open: `next lint`, for A3b (Next.js 16)
+- Fixed in A3: the `images` block and `serverExternalPackages` are gone; the app keeps `<img>`, so no R2 `remotePatterns`. Fixed in A3a: the `export` script is dropped from `package.json`
+- Closed by: A3b upgraded to Next.js 16.4.3. `lint` is `eslint .` (ESLint CLI, native flat config from eslint-config-next 16, no FlatCompat), `build` is `npm run lint && next build`, and the `eslint` key left `next.config.js`. Nothing calls `next lint`
 
 ### F-07: Unused dependencies
 

@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // may write. Admin and cron paths are refused outright, whatever the method.
 const READ_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (/^\/(admin|api\/admin|api\/cron)(\/|$)/.test(pathname)) {
