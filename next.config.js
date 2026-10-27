@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Type and lint errors fail the build
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+  // Type errors fail the build; lint runs in the build script (npm run lint)
   typescript: {
     ignoreBuildErrors: false,
   },

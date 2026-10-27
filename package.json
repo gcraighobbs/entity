@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "node scripts/verify-catalog.mjs",
-    "build": "next build",
+    "build": "npm run lint && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "verify:catalog": "node scripts/verify-catalog.mjs",
     "verify:media": "node scripts/verify-media.mjs"
   },
