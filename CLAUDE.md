@@ -25,7 +25,7 @@ Read this first in every session. This repo is the source of truth for Entity's 
 | --- | --- | --- |
 | Frontend | Next.js 16.4.3 (app router, Turbopack), React 19.3.1, TypeScript 5, Tailwind 4, Framer Motion 12 (A3b) | Same |
 | Backend | One route handler, `GET /api/species` (static); `src/proxy.ts` refuses writes (A3; the middleware file until A3b) | Same |
-| Hosting | Vercel Hobby, project `entity`, team `gcraighobbs-projects`, production `entity-three.vercel.app` | Same, then the custom domain (A4) |
+| Hosting | Vercel Hobby, project `entity`, team `gcraighobbs-projects`, production `https://entityai.org` (A4; www redirects 308 to the apex, and `entity-three.vercel.app` still answers) | Same |
 | Catalog | `src/data/species.json` (A2, 130 species), read by `/api/species` (A3) | Same |
 | Media | Cloudflare R2, `https://media.gcraighobbs.com` (A3) | Same |
 | Generation | None; the stubs and routes were deleted in A3 | Returns in Phase B |

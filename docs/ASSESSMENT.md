@@ -21,7 +21,7 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 | F-13 | low | open | Env var list on the architecture page is wrong | A1 closeout (advisor, Notion) |
 | F-14 | medium | fixed (A1) | No git identity; A0 commits carry a hostname address | A1 |
 | F-15 | low | fixed (A1) | Stale Vercel bot PR #1 | A1 |
-| F-16 | medium | open | GitHub Pages still serves the 2025 site | A4 |
+| F-16 | medium | fixed (A4) | GitHub Pages still serves the 2025 site | A4 |
 | F-17 | low | fixed (A3) | Legacy root markdown and Supabase scripts | A1 (markdown), A3 (scripts) |
 | F-18 | low | fixed (A1) | README described the 2025 generator | A1 |
 | F-19 | low | fixed (A3) | public/ holds only unused starter SVGs | A3 |
@@ -154,10 +154,11 @@ Severity: critical, high, medium, low. Status: open, partly fixed, fixed (with t
 ### F-16: GitHub Pages still serves the 2025 site
 
 - Severity: medium
-- Status: open
+- Status: fixed (A4)
 - Where: repo Pages settings (build type workflow, source `main` /, last built Aug 20, 2025 from `18cefc1`); About homepage `gcraighobbs.github.io/entity/`
 - What: the page loads and shows a Jekyll render of the old README, with a canonical link to `wuchinow.github.io/entity`. That build predates F-01, and the workflow file is gone, so it does not rebuild today. A rebuild from `main` would publish every markdown file, `docs/archive/` included
-- Closes in: A4, since entity.org may still route there (turn Pages off and update the About link)
+- Closes in: A4, since entityai.org may still route there (turn Pages off and update the About link)
+- Closed by: A4 unpublished the site and deleted the Pages configuration (the Pages API and `gcraighobbs.github.io/entity/` both answer 404) and set the repo's About link to `https://entityai.org`. The A4 step 0 lookups found that entityai.org never routed through Pages: Squarespace forwarded it to `entity-gamma.vercel.app`
 
 ### F-17: Legacy root files
 
